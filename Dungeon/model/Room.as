@@ -1,7 +1,8 @@
-package  
+package model
 {
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import model.datatypes.DirectionType;
 	/**
 	 * ...
 	 * @author gil

@@ -1,6 +1,7 @@
-package  
+package model
 {
 	import flash.geom.Point;
+	import model.datatypes.CellType;
 	/**
 	 * ...
 	 * @author gil

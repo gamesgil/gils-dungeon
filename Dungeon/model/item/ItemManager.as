@@ -1,14 +1,16 @@
-package  
+package model.item
 {
+	import model.datatypes.ItemType;
+	import model.Map;
 	/**
 	 * ...
 	 * @author gil
 	 */
-	public class ItemGenerator 
+	public class ItemManager 
 	{
 		private var m_map:Map;
 		
-		public function ItemGenerator(map:Map) 
+		public function ItemManager(map:Map) 
 		{
 			m_map = map;
 		}

@@ -1,7 +1,11 @@
-﻿package  
+﻿package model
 {
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
+	import model.datatypes.CellType;
+	import model.datatypes.DirectionType;
+	import model.entitiy.EntityManager;
+	import model.item.ItemManager;
 	/**
 	 * ...
 	 * @author gil
@@ -13,8 +17,8 @@
 		private var m_cells:Array;
 		private var m_rooms:Array;
 		private var m_type:String;
-		private var m_itemGenerator:ItemGenerator;
-		private var m_entityGenerator:EntityGenerator;
+		private var m_itemManager:ItemManager;
+		private var m_entityManager:EntityManager;
 		
 		public function Map(width:uint, height:uint) 
 		{
@@ -23,8 +27,8 @@
 			
 			m_cells = [];
 			m_rooms = [];
-			m_itemGenerator = new ItemGenerator(this);
-			m_entityGenerator = new EntityGenerator(this);
+			m_itemManager = new ItemManager(this);
+			m_entityManager = new EntityManager(this);
 			
 			for (var i:int = 0; i < height; i++) 
 			{
@@ -54,7 +58,7 @@
 		
 		public function placeItems():void
 		{
-			m_itemGenerator.placeItems();
+			m_itemManager.placeItems();
 		}
 		
 		public function findRandomFreeCell():Cell
@@ -315,9 +319,9 @@
 			m_rooms = value;
 		}
 		
-		public function get entityGenerator():EntityGenerator 
+		public function get entityManager():EntityManager 
 		{
-			return m_entityGenerator;
+			return m_entityManager;
 		}
 		
 		public function getRoomById(id:uint):Room
