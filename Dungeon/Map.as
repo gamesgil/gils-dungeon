@@ -14,6 +14,7 @@
 		private var m_rooms:Array;
 		private var m_type:String;
 		private var m_itemGenerator:ItemGenerator;
+		private var m_entityGenerator:EntityGenerator;
 		
 		public function Map(width:uint, height:uint) 
 		{
@@ -23,6 +24,7 @@
 			m_cells = [];
 			m_rooms = [];
 			m_itemGenerator = new ItemGenerator(this);
+			m_entityGenerator = new EntityGenerator(this);
 			
 			for (var i:int = 0; i < height; i++) 
 			{
@@ -53,11 +55,6 @@
 		public function placeItems():void
 		{
 			m_itemGenerator.placeItems();
-		}
-		
-		public function placePlayer():void
-		{
-			findRandomFreeCell().type = CharacterType.PLAYER;
 		}
 		
 		public function findRandomFreeCell():Cell
@@ -316,6 +313,11 @@
 		public function set rooms(value:Array):void 
 		{
 			m_rooms = value;
+		}
+		
+		public function get entityGenerator():EntityGenerator 
+		{
+			return m_entityGenerator;
 		}
 		
 		public function getRoomById(id:uint):Room

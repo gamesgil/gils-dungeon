@@ -17,7 +17,7 @@ package
 		{
 			for (var i:int = 0; i < 10; i++) 
 			{
-				m_map.findRandomFreeCell().type = ItemTypes.TREASURE_CHEST;
+				m_map.findRandomFreeCell().type =  ItemType.TREASURE_CHEST;
 			}
 		}
 		

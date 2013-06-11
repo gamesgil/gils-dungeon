@@ -4,7 +4,7 @@ package
 	 * ...
 	 * @author gil
 	 */
-	public class ItemTypes 
+	public class ItemType 
 	{
 		static public const TREASURE_CHEST:String = "T";
 		

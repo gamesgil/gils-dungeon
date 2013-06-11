@@ -4,7 +4,7 @@ package
 	 * ...
 	 * @author gil
 	 */
-	public class CharacterType
+	public class EntityType
 	{
 		static public const PLAYER:String = "@";
 		
