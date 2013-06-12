@@ -4,7 +4,11 @@
 	import flash.geom.Rectangle;
 	import model.datatypes.CellType;
 	import model.datatypes.DirectionType;
+	import model.datatypes.ItemType;
+	import model.entitiy.Entity;
 	import model.entitiy.EntityManager;
+	import model.entitiy.Player;
+	import model.item.Item;
 	import model.item.ItemManager;
 	/**
 	 * ...
@@ -42,18 +46,66 @@
 		public function toString():String
 		{
 			var result:String = "";
+			var cell:Cell;
+			var item:Item;
+			var entity:Entity;
 			
 			for (var i:int = 0; i < height; i++) 
 			{
 				for (var j:int = 0; j < width; j++) 
 				{
-					result += getCell(new Point(j, i)).type;
+					cell = getCell(new Point(j, i));
+					
+					if (cell.entity)
+					{
+						result += cell.entity;
+					}
+					else if (cell.item)
+					{
+						result += cell.item.type;
+					}
+					else
+					{
+						result += cell.type;
+					}
 				}
 				
 				result += "\n";
 			}
 			
 			return result;
+		}
+		
+		public function moveEntity(entity:Entity, direction:DirectionType):Boolean
+		{
+			var cellPoint:Point;
+	
+			switch (direction)
+			{
+				case DirectionType.WEST:
+					cellPoint = new Point(player.x - 1, player.y);
+					break;
+					
+				case DirectionType.NORTH:
+					cellPoint = new Point(player.x, player.y - 1);
+					break;
+					
+				case DirectionType.EAST:
+					cellPoint = new Point(player.x + 1, player.y);
+					break;
+				
+				case DirectionType.SOUTH:
+					cellPoint = new Point(player.x, player.y + 1);
+					break;
+					
+			}
+				
+			if (cellPoint)
+			{
+				entityManager.moveEntity(player, getCell(cellPoint));
+			}
+			
+			return cellPoint != null;
 		}
 		
 		public function placeItems():void
@@ -79,7 +131,7 @@
 			return result;
 		}
 		
-		public function setCell(point:Point, type:String):void
+		public function setCell(point:Point, type:CellType):void
 		{
 			getCell(point).type = type;
 		}
@@ -116,9 +168,14 @@
 			}
 		}
 		
+		public function addEntity(entity:Entity):void
+		{
+			entityManager.addEntity(entity);
+		}
+		
 		private function drawRoom(room:Room):void 
 		{
-			var type:String;
+			var type:CellType;
 			
 			for (var i:int = 0; i < room.height; i++) 
 			{
@@ -232,7 +289,7 @@
 			}
 		}
 		
-		public function hasAdjacentCellInDirection(location:Point, direction:String):Boolean
+		public function hasAdjacentCellInDirection(location:Point, direction:DirectionType):Boolean
 		{
 			if ((location.x < 0)  || (location.x >= width) || (location.y < 0) || (location.y > height))
 			{
@@ -379,6 +436,11 @@
 		public function roomToMapCoordinates(room:Room, point:Point):Point
 		{
 			return new Point(room.left + point.x, room.top + point.y);
+		}
+		
+		public function get player():Player
+		{
+			return entityManager.player;
 		}
 		
 		static public function rand(min:uint, max:uint):uint

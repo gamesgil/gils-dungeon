@@ -26,7 +26,7 @@ package model.entitiy
 			m_entities.push(entity);
 			entity.cell = cell;
 			
-			cell.type = EntityType.PLAYER;
+			cell.entity = entity;
 		}
 		
 		public function get player():Player
@@ -50,8 +50,9 @@ package model.entitiy
 			if (cell.type == CellType.FLOOR)
 			{
 				entity.cell.type = CellType.FLOOR;
+				entity.cell.entity = null;
 				entity.cell = cell;
-				entity.cell.type = EntityType.PLAYER;
+				entity.cell.entity = entity;
 			}
 		}
 	}

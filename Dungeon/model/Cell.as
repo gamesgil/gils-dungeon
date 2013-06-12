@@ -2,6 +2,9 @@ package model
 {
 	import flash.geom.Point;
 	import model.datatypes.CellType;
+	import model.datatypes.ItemType;
+	import model.entitiy.Entity;
+	import model.item.Item;
 	/**
 	 * ...
 	 * @author gil
@@ -9,8 +12,10 @@ package model
 	public class Cell 
 	{
 		private var m_visited:Boolean;
-		private var m_type:String;
+		private var m_type:CellType;
 		private var m_coordinates:Point;
+		private var m_item:Item;
+		private var m_entity:Entity;
 		
 		public function Cell(point:Point) 
 		{
@@ -30,12 +35,12 @@ package model
 			m_visited = value;
 		}
 		
-		public function get type():String 
+		public function get type():CellType 
 		{
 			return m_type;
 		}
 		
-		public function set type(value:String):void 
+		public function set type(value:CellType):void 
 		{
 			m_type = value;
 		}
@@ -48,6 +53,26 @@ package model
 		public function get y():int 
 		{
 			return m_coordinates.y;
+		}
+		
+		public function get item():Item 
+		{
+			return m_item;
+		}
+		
+		public function set item(value:Item):void 
+		{
+			m_item = value;
+		}
+		
+		public function get entity():Entity
+		{
+			return m_entity;
+		}
+		
+		public function set entity(value:Entity):void 
+		{
+			m_entity = value;
 		}
 		
 	}

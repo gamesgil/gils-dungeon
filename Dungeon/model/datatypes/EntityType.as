@@ -4,10 +4,23 @@ package model.datatypes
 	 * ...
 	 * @author gil
 	 */
-	public class EntityType
+	public final class EntityType
 	{
-		static public const PLAYER:String = "@";
+		static public const PLAYER:EntityType = new EntityType();
 		
+		public function toString():String
+		{
+			var result:String = "";
+			
+			switch (this)
+			{
+				case PLAYER:
+					result = "@";
+					break;
+			}
+			
+			return result;
+		}
 	}
 
 }

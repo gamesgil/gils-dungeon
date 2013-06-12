@@ -1,5 +1,6 @@
 package model.item
 {
+	import model.Cell;
 	import model.datatypes.ItemType;
 	import model.Map;
 	/**
@@ -17,9 +18,14 @@ package model.item
 		
 		public function placeItems():void
 		{
+			var cell:Cell;
+			
 			for (var i:int = 0; i < 10; i++) 
 			{
-				m_map.findRandomFreeCell().type =  ItemType.TREASURE_CHEST;
+				cell = m_map.findRandomFreeCell();
+				cell.item = new Item();
+				cell.item.type = ItemType.TREASURE_CHEST;
+				
 			}
 		}
 		

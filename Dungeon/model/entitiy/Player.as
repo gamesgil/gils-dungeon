@@ -1,5 +1,6 @@
 package model.entitiy
 {
+	import model.datatypes.EntityType;
 	/**
 	 * ...
 	 * @author gil
@@ -9,7 +10,7 @@ package model.entitiy
 		
 		public function Player() 
 		{
-			
+			type = EntityType.PLAYER;
 		}
 		
 	}

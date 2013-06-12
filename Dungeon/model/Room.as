@@ -23,7 +23,7 @@ package model
 			addDoor([DirectionType.NORTH, DirectionType.SOUTH, DirectionType.EAST, DirectionType.WEST][Map.rand(0, 4)]);
 		}
 		
-		public function addDoor(side:String):void
+		public function addDoor(side:DirectionType):void
 		{
 			var rand:uint;
 			
