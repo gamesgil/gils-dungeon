@@ -23,9 +23,7 @@ package model.item
 			for (var i:int = 0; i < 10; i++) 
 			{
 				cell = m_map.findRandomFreeCell();
-				cell.item = new Item();
-				cell.item.type = ItemType.TREASURE_CHEST;
-				
+				cell.item = new TreasureChest();
 			}
 		}
 		

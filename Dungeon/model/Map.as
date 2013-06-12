@@ -45,14 +45,24 @@
 		
 		public function toString():String
 		{
+			return getViewPort(new Rectangle(0, 0, width, height));
+		}
+		
+		public function getViewPort(rect:Rectangle):String
+		{
 			var result:String = "";
 			var cell:Cell;
 			var item:Item;
 			var entity:Entity;
+			var top:uint = Math.min(Math.max(0, rect.top), height);
+			var bottom:uint = Math.min(Math.max(0, top + rect.height), height);
 			
-			for (var i:int = 0; i < height; i++) 
+			var left:uint = Math.min(Math.max(0, rect.left), width);
+			var right:uint = Math.min(Math.max(0, left + rect.width), width);
+			
+			for (var i:int = top; i < bottom; i++) 
 			{
-				for (var j:int = 0; j < width; j++) 
+				for (var j:int = left; j < right; j++) 
 				{
 					cell = getCell(new Point(j, i));
 					
@@ -72,6 +82,13 @@
 				
 				result += "\n";
 			}
+			
+			return result;
+		}
+		
+		public function getPlayerRect(padWight:uint, padHeight:uint):Rectangle
+		{
+			var result:Rectangle = new Rectangle(player.x - padWight, player.y - padHeight, padWight * 2, padHeight * 2);
 			
 			return result;
 		}
@@ -103,6 +120,8 @@
 			if (cellPoint)
 			{
 				entityManager.moveEntity(player, getCell(cellPoint));
+				
+				entity.checkOverlapWithItem();
 			}
 			
 			return cellPoint != null;

@@ -29,6 +29,14 @@ package model.entitiy
 			return m_idx;
 		}
 		
+		public function checkOverlapWithItem():void
+		{
+			if (cell.item)
+			{
+				trace(cell.item);
+			}
+		}
+		
 		public function get x():uint 
 		{
 			return m_cell.x;
