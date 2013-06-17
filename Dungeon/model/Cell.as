@@ -75,6 +75,21 @@ package model
 			m_entity = value;
 		}
 		
+		public function isTraversable():Boolean
+		{
+			var result:Boolean = true;
+			
+			if (entity)
+			{
+				result = false;
+			}
+			else if (type == CellType.WALL)
+			{
+				result = false;
+			}
+			
+			return result;
+		}
 	}
 
 }

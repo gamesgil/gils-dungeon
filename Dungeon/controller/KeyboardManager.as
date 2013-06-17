@@ -44,7 +44,8 @@ package controller
 			
 			if (success)
 			{
-				dispatchEvent(new Event(Event.COMPLETE));
+				trace("success");
+				dispatchEvent(new Event(Event.CHANGE));
 			}
 		}
 		

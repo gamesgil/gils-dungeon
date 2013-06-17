@@ -7,6 +7,7 @@
 	import model.datatypes.ItemType;
 	import model.entitiy.Entity;
 	import model.entitiy.EntityManager;
+	import model.entitiy.Monster;
 	import model.entitiy.Player;
 	import model.item.Item;
 	import model.item.ItemManager;
@@ -130,6 +131,17 @@
 		public function placeItems():void
 		{
 			m_itemManager.placeItems();
+		}
+		
+		public function addMonsters():void
+		{
+			var cell:Cell;
+			
+			for (var i:int = 0; i < 5; i++) 
+			{
+				cell = findRandomFreeCell();
+				cell.entity = new Monster();
+			}
 		}
 		
 		public function findRandomFreeCell():Cell

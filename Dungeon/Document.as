@@ -6,6 +6,7 @@ package
 	import flash.text.TextField;
 	import flash.text.TextFormat;
 	import flash.events.KeyboardEvent;
+	import flash.ui.Keyboard;
 	import model.Map;
 	import model.datatypes.CellType;
 	import model.datatypes.ItemType;
@@ -23,6 +24,7 @@ package
 		private var map:Map;
 		private var roomW:uint;
 		private var roomH:uint;
+		private var km:KeyboardManager;
 		
 		public function Document() 
 		{
@@ -43,9 +45,15 @@ package
 
 			map.surroundFloorTilesWithWalls();
 			map.placeItems();
+			map.addMonsters();
 			map.addEntity(new Player());
 			
 			redraw();
+			
+			km = new KeyboardManager(stage);
+			km.map = map;
+			
+			km.addEventListener(Event.CHANGE, redraw);
 		}
 		
 		function redraw(e:Event = null):void
@@ -81,6 +89,10 @@ package
 						break;
 						
 					case EntityType.PLAYER.toString():
+						format.color = 0x0000ff;
+						break;
+						
+					case EntityType.MONSTER.toString():
 						format.color = 0xff0000;
 						break;
 						
