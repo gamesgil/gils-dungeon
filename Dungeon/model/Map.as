@@ -1,5 +1,7 @@
 ﻿package model
 {
+	import flash.events.Event;
+	import flash.events.EventDispatcher;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
 	import model.datatypes.CellType;
@@ -11,11 +13,12 @@
 	import model.entitiy.Player;
 	import model.item.Item;
 	import model.item.ItemManager;
+	
 	/**
 	 * ...
 	 * @author gil
 	 */
-	public class Map 
+	public class Map extends EventDispatcher
 	{
 		private var m_width:uint;
 		private var m_height:uint;
@@ -24,8 +27,9 @@
 		private var m_type:String;
 		private var m_itemManager:ItemManager;
 		private var m_entityManager:EntityManager;
+		private var m_fightManager:FightManager;
 		
-		public function Map(width:uint, height:uint) 
+		public function Map(width:uint, height:uint)
 		{
 			this.width = width;
 			this.height = height;
@@ -34,17 +38,65 @@
 			m_rooms = [];
 			m_itemManager = new ItemManager(this);
 			m_entityManager = new EntityManager(this);
+			m_fightManager = new FightManager();
 			
-			for (var i:int = 0; i < height; i++) 
+			for (var i:int = 0; i < height; i++)
 			{
-				for (var j:int = 0; j < width; j++) 
+				for (var j:int = 0; j < width; j++)
 				{
 					m_cells.push(new Cell(new Point(j, i)));
 				}
 			}
+			
+			m_fightManager.addEventListener(Event.CHANGE, checkStatus);
 		}
 		
-		public function toString():String
+		private function checkStatus(e:Event):void
+		{
+			//go over all entities and kill them if necessary
+			entityManager.scanForDeadEntities();
+			
+			trace("isGameOver=" + isGameOver());
+			
+			if (!isGameOver())
+			{
+				updateChange();
+				
+				doCpuTurn();
+			}
+			else
+			{
+				
+			}
+		}
+		
+		private function doCpuTurn():void 
+		{
+			var entity:Entity;
+			
+			for (var i:int = 0; i < entityManager.numOfEntities && !isGameOver(); i++) 
+			{
+				entity = entityManager.getEntity(i);
+				
+				if (entity is Monster)
+				{
+					trace(entity);
+					if (entityManager.isEntityWithinRangeOrAnother(entity, player, 1))
+					{
+						m_fightManager.fight(entity, player);
+					}
+					else
+					{
+						//move monster
+						trace(entity + " moves");
+					}
+				}
+			}
+			
+			updateChange();
+		}
+		
+		public function get mapData():String
 		{
 			return getViewPort(new Rectangle(0, 0, width, height));
 		}
@@ -61,9 +113,9 @@
 			var left:uint = Math.min(Math.max(0, rect.left), width);
 			var right:uint = Math.min(Math.max(0, left + rect.width), width);
 			
-			for (var i:int = top; i < bottom; i++) 
+			for (var i:int = top; i < bottom; i++)
 			{
-				for (var j:int = left; j < right; j++) 
+				for (var j:int = left; j < right; j++)
 				{
 					cell = getCell(new Point(j, i));
 					
@@ -97,35 +149,52 @@
 		public function moveEntity(entity:Entity, direction:DirectionType):Boolean
 		{
 			var cellPoint:Point;
-	
+			var cell:Cell;
+			
 			switch (direction)
 			{
-				case DirectionType.WEST:
+				case DirectionType.WEST: 
 					cellPoint = new Point(player.x - 1, player.y);
 					break;
-					
-				case DirectionType.NORTH:
+				
+				case DirectionType.NORTH: 
 					cellPoint = new Point(player.x, player.y - 1);
 					break;
-					
-				case DirectionType.EAST:
+				
+				case DirectionType.EAST: 
 					cellPoint = new Point(player.x + 1, player.y);
 					break;
 				
-				case DirectionType.SOUTH:
+				case DirectionType.SOUTH: 
 					cellPoint = new Point(player.x, player.y + 1);
 					break;
-					
+			
 			}
-				
+			
 			if (cellPoint)
 			{
-				entityManager.moveEntity(player, getCell(cellPoint));
+				cell = getCell(cellPoint);
 				
-				entity.checkOverlapWithItem();
+				if (entity.hp && cell.isTraversable())
+				{
+					entityManager.moveEntity(player, cell);
+					entity.checkOverlapWithItem();
+					
+					updateChange();
+				}
+				else if (cell.entity)
+				{
+					m_fightManager.fight(player, cell.entity);
+				}
+				
 			}
 			
 			return cellPoint != null;
+		}
+		
+		private function updateChange():void
+		{
+			dispatchEvent(new Event(Event.CHANGE));
 		}
 		
 		public function placeItems():void
@@ -137,10 +206,9 @@
 		{
 			var cell:Cell;
 			
-			for (var i:int = 0; i < 5; i++) 
+			for (var i:int = 0; i < 5; i++)
 			{
-				cell = findRandomFreeCell();
-				cell.entity = new Monster();
+				addEntity(new Monster());
 			}
 		}
 		
@@ -149,7 +217,7 @@
 			var result:Cell;
 			var cells:Array = [];
 			
-			for (var i:int = 0; i < m_cells.length; i++) 
+			for (var i:int = 0; i < m_cells.length; i++)
 			{
 				if (Cell(m_cells[i]).type == CellType.FLOOR)
 				{
@@ -174,7 +242,7 @@
 			//disallow creating a room completely within another room
 			var allow:Boolean = true;
 			
-			for (var i:int = 0; i < rooms.length; i++) 
+			for (var i:int = 0; i < rooms.length; i++)
 			{
 				//if (!doesRoomIntersectAnother(room) && doesRoomTouchAnother(room)) //tends to create larger spaces 
 				//if (!doesRoomIntersectAnother(room) && !doesRoomIntersectAnother(room)) //tends to create larger spaces 
@@ -183,12 +251,11 @@
 					allow = false;
 				}
 			}
-
+			
 			if (allow)
 			{
 				room.id = rooms.length;
 				rooms.push(room);
-				
 				
 				//if (!doesRoomIntersectAnother(room))
 				{
@@ -204,13 +271,13 @@
 			entityManager.addEntity(entity);
 		}
 		
-		private function drawRoom(room:Room):void 
+		private function drawRoom(room:Room):void
 		{
 			var type:CellType;
 			
-			for (var i:int = 0; i < room.height; i++) 
+			for (var i:int = 0; i < room.height; i++)
 			{
-				for (var j:int = 0; j < room.width; j++) 
+				for (var j:int = 0; j < room.width; j++)
 				{
 					if ((i > 0 && i < room.height - 1 && j > 0 && j < room.width - 1) || isPointWithinRoom(new Point(room.left + j, room.top + i), room.id))
 					{
@@ -224,21 +291,21 @@
 						}
 						else
 						{
-							type =  CellType.DOOR;
+							type = CellType.DOOR;
 						}
 					}
 					
 					setCell(new Point(room.left + j, room.top + i), type);
 				}
 			}
-			
+		
 		}
 		
 		public function doesRoomIntersectAnother(room:Room):Boolean
 		{
 			var result:Boolean = false;
 			
-			for (var i:int = 0; i < rooms.length; i++) 
+			for (var i:int = 0; i < rooms.length; i++)
 			{
 				if (room.id != rooms[i].id)
 				{
@@ -253,7 +320,7 @@
 			return result;
 		}
 		
-		private function doesRoomTouchAnother(room:Room):Boolean 
+		private function doesRoomTouchAnother(room:Room):Boolean
 		{
 			var newRect:Rectangle = new Rectangle(room.left - 1, room.top - 1, room.width + 2, room.height + 2);
 			var newRoom:Room = new Room(newRect);
@@ -262,12 +329,12 @@
 			return doesRoomIntersectAnother(newRoom);
 		}
 		
-		public function isPointWithinRoom(point:Point, exclude:uint):Boolean 
+		public function isPointWithinRoom(point:Point, exclude:uint):Boolean
 		{
 			var result:Boolean = false;
 			var room:Room;
 			
-			for (var i:int = 0; i < rooms.length; i++) 
+			for (var i:int = 0; i < rooms.length; i++)
 			{
 				room = rooms[i];
 				
@@ -289,7 +356,7 @@
 			var iterations:uint = 0;
 			var rand:Number;
 			
-			while ((point1.x != point2.x || point1.y != point2.y )&& iterations < 100)
+			while ((point1.x != point2.x || point1.y != point2.y) && iterations < 100)
 			{
 				rand = Math.random();
 				
@@ -320,35 +387,9 @@
 			}
 		}
 		
-		public function hasAdjacentCellInDirection(location:Point, direction:DirectionType):Boolean
+		public function isGameOver():Boolean
 		{
-			if ((location.x < 0)  || (location.x >= width) || (location.y < 0) || (location.y > height))
-			{
-				return false;
-			}
-			
-			switch (direction)
-			{
-				case DirectionType.NORTH:
-					return location.y > 0;
-					break;
-					
-				case DirectionType.SOUTH:
-					return location.y < (height - 1);
-					break;
-					
-				case DirectionType.WEST:
-					return location.x > 0;
-					break;
-					
-				case DirectionType.EAST:
-					return  location.x < (width - 1);
-					break;
-					
-				default:
-					return false;
-					
-			}
+			return (player == null || player.hp == 0);
 		}
 		
 		public function pickRandomCellAndMarkItVisited():Point
@@ -356,7 +397,7 @@
 			var result:Point = new Point();
 			result.x = rand(0, width);
 			result.y = rand(0, height);
-		
+			
 			getCell(result).visited = true;
 			
 			return result;
@@ -367,47 +408,47 @@
 			return m_cells[loc.y * width + loc.x];
 		}
 		
-		public function get width():uint 
+		public function get width():uint
 		{
 			return m_width;
 		}
 		
-		public function set width(value:uint):void 
+		public function set width(value:uint):void
 		{
 			m_width = value;
 		}
 		
-		public function get height():uint 
+		public function get height():uint
 		{
 			return m_height;
 		}
 		
-		public function set height(value:uint):void 
+		public function set height(value:uint):void
 		{
 			m_height = value;
 		}
 		
-		public function get type():String 
+		public function get type():String
 		{
 			return m_type;
 		}
 		
-		public function set type(value:String):void 
+		public function set type(value:String):void
 		{
 			m_type = value;
 		}
 		
-		public function get rooms():Array 
+		public function get rooms():Array
 		{
 			return m_rooms;
 		}
 		
-		public function set rooms(value:Array):void 
+		public function set rooms(value:Array):void
 		{
 			m_rooms = value;
 		}
 		
-		public function get entityManager():EntityManager 
+		public function get entityManager():EntityManager
 		{
 			return m_entityManager;
 		}
@@ -416,7 +457,7 @@
 		{
 			var result:Room;
 			
-			for (var i:int = 0; i < rooms.length; i++) 
+			for (var i:int = 0; i < rooms.length; i++)
 			{
 				//trace("compare: " + rooms[i].id + " to " + id);
 				if (rooms[i].id == id)
@@ -433,7 +474,7 @@
 		{
 			var cell:Cell;
 			
-			for (var i:int = 0; i < m_cells.length; i++) 
+			for (var i:int = 0; i < m_cells.length; i++)
 			{
 				cell = Cell(m_cells[i]);
 				

@@ -32,8 +32,8 @@ package
 			
 			for (var i:uint = 0; i < 10; i++)
 			{
-				roomW = Map.rand(4, 15);
-				roomH = Map.rand(4, 15);
+				roomW = Map.rand(8, 15);
+				roomH = Map.rand(8, 15);
 				
 				map.createRoom(new Rectangle(Map.rand(2, map.width - roomW - 2), Map.rand(2, map.height - roomH - 2), roomW, roomH));
 			}
@@ -53,13 +53,18 @@ package
 			km = new KeyboardManager(stage);
 			km.map = map;
 			
-			km.addEventListener(Event.CHANGE, redraw);
+			map.addEventListener(Event.CHANGE, redraw);
 		}
 		
 		function redraw(e:Event = null):void
 		{
 			txt.text = map.getViewPort(map.getPlayerRect(20, 20));
 			colorizeMap(txt);
+			
+			if (map.isGameOver())
+			{
+				map.removeEventListener(Event.CHANGE, redraw);
+			}
 		}
 
 		function colorizeMap(txt:TextField):void
